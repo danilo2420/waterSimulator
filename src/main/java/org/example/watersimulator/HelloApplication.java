@@ -1,19 +1,14 @@
 package org.example.watersimulator;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -25,6 +20,7 @@ public class HelloApplication extends Application {
     // Note: Grid will be a square
     static final int GRID_WIDTH = 400; // (in pixels)
     static final int TILES_IN_ROW = 25;
+    static final String TILE_STARTING_COLOR = "#ebebeb";
 
     // Other variables
     Rectangle tiles[][];
@@ -36,12 +32,12 @@ public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        createUI(stage);
-
-        tiles[1][2].setFill(Color.BLUE);
+        createAndShowUI(stage);
+        new Thread(() -> runSimulation() ).start();
     }
 
-    public void createUI(Stage stage){
+    // UI CONSTRUCTION
+    public void createAndShowUI(Stage stage){
         // Root basic setup
         VBox root = new VBox(30);
 
@@ -75,7 +71,7 @@ public class HelloApplication extends Application {
         GridPane grid = new GridPane();
         for (int i = 0; i < TILES_IN_ROW; i++) {
             for (int j = 0; j < TILES_IN_ROW; j++) {
-                Rectangle tile = new Rectangle(tileWidth, tileWidth, Color.web("#ebebeb"));
+                Rectangle tile = new Rectangle(tileWidth, tileWidth, Color.web(TILE_STARTING_COLOR));
 
                 // Construction of the UI
                 tile.setStroke(Color.web("#bfbfbf"));
@@ -89,4 +85,26 @@ public class HelloApplication extends Application {
         return grid;
     }
 
+    // LOGIC
+    public void runSimulation(){
+        for (int i = 0; i < TILES_IN_ROW; i++) {
+            for (int j = 0; j < TILES_IN_ROW; j++) {
+                washGrid();
+                tiles[i][j].setFill(Color.BLUE);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    public void washGrid(){
+        for(Rectangle[] row : tiles){
+            for(Rectangle tile : row){
+                tile.setFill(Color.web(TILE_STARTING_COLOR));
+            }
+        }
+    }
 }
