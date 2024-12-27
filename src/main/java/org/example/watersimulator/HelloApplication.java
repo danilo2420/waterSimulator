@@ -20,7 +20,9 @@ import java.io.IOException;
 
 public class HelloApplication extends Application {
 
-    // Number to decide the number of tiles in the grid
+    // Note: Grid will be a square
+    static final int GRID_WIDTH = 400; // (in pixels)
+    static final int TILES_IN_ROW = 25;
 
     public static void main(String[] args) {
         launch();
@@ -54,17 +56,19 @@ public class HelloApplication extends Application {
     }
 
     public GridPane initializeGrid(){
-        GridPane grid = new GridPane();
+        // Calculation for dynamic sizing
+        double tileWidth = GRID_WIDTH / (TILES_IN_ROW*1.0);
 
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                Rectangle tile = new Rectangle(40, 40, Color.web("#ebebeb"));
+        // Creation of grid
+        GridPane grid = new GridPane();
+        for (int i = 0; i < TILES_IN_ROW; i++) {
+            for (int j = 0; j < TILES_IN_ROW; j++) {
+                Rectangle tile = new Rectangle(tileWidth, tileWidth, Color.web("#ebebeb"));
                 tile.setStroke(Color.web("#bfbfbf"));
-                tile.setStrokeWidth(1);
+                tile.setStrokeWidth(0.5);
                 grid.add(tile, j, i);
             }
         }
-
         return grid;
     }
 
