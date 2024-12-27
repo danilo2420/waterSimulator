@@ -9,17 +9,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.example.watersimulator.Tile.Tile;
 import org.example.watersimulator.Tile.TileState;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class HelloApplication extends Application {
 
@@ -194,39 +191,86 @@ public class HelloApplication extends Application {
     // LOGIC
     public void runSimulation(){
         while(isSimulationRunning) {
-            for (int i = 0; i < TILES_IN_ROW; i++) {
-                for (int j = 0; j < TILES_IN_ROW; j++) {
-                    Tile tile = tiles[i][j];
-                    TileState originalState = tile.getState();
-
-                    // TODO: this is where the simulation logic should be
-                    switch (originalState) {
-                        case EMPTY:
-                            tile.setState(TileState.WATER);
-                            break;
-                        case SOLID:
-                            tile.setState(TileState.EMPTY);
-                            break;
-                        case WATER:
-                            tile.setState(TileState.SOLID);
-                    }
-
-                /*
-                washGrid();
-                tiles[i][j].setState(TileState.WATER);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
-                 */
-                }
-            }
+            runIteration();
             pause(1000);
         }
         washGrid();
         checkKeys = true;
+    }
+
+    public void runIteration(){
+        Random random = new Random();
+        for (int i = 0; i < tiles.length; i++) {
+            if(random.nextBoolean()){
+                for (int j = 0; j < tiles[i].length; j++) {
+                    updateCell(i, j);
+                }
+            }else{
+                for (int j = tiles[i].length - 1; j >= 0; j--) {
+                    updateCell(i, j);
+                }
+            }
+        }
+
+    }
+
+    // TODO: we have to take into account solids as well
+
+    // this is the logic for an iteration of a particular cell
+    public void updateCell(int i, int j){
+        Tile current = tiles[i][j];
+        if(current.getState() == TileState.WATER){
+            // look down
+            if(lookDown(i, j)) return;
+
+            // look at one side
+            Random random = new Random();
+            if(random.nextBoolean()){
+                if(lookOver(i, j, true)) return;
+                lookOver(i, j, false);
+            }else{
+                if(lookOver(i, j, false)) return;
+                lookOver(i, j, true);
+            }
+        }
+    }
+
+    public boolean lookDown(int i, int j){
+        Tile current = tiles[i][j];
+        if(i < tiles.length - 1 && tiles[i+1][j].getState() == TileState.EMPTY){
+            swapCells(current, tiles[i+1][j]);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean lookOver(int i, int j, boolean lookRight){
+        Tile current = tiles[i][j];
+        if(lookRight){
+            if(j >= tiles[i].length - 1) return false;
+
+            Tile other = tiles[i][j+1];
+            if(other.getState() == TileState.EMPTY){
+                swapCells(current, other);
+                return true;
+            }
+            return false;
+        }else{
+            if(j <= 0) return false;
+
+            Tile other = tiles[i][j-1];
+            if(other.getState() == TileState.EMPTY){
+                swapCells(current, other);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public void swapCells(Tile tile1, Tile tile2){
+        TileState aux = tile1.getState();
+        tile1.setState(tile2.getState());
+        tile2.setState(aux);
     }
 
     public void washGrid(){
