@@ -34,6 +34,7 @@ public class HelloApplication extends Application {
     Scene scene;
     GridPane grid;
     Button btnStart;
+    Button btnClear;
 
     // Other variables
     Thread simulation;
@@ -58,7 +59,7 @@ public class HelloApplication extends Application {
     // UI CONSTRUCTION
     public void createAndShowUI(Stage stage){
         // Root basic setup
-        VBox root = new VBox(15);
+        VBox root = new VBox(10);
 
         // Creation of elements
         Label lblTitle = new Label("Water simulator");
@@ -74,10 +75,12 @@ public class HelloApplication extends Application {
 
         btnStart = new Button("Start simulation");
 
+        btnClear = new Button("Clear grid");
+
         // Add elements to and set up root
         root.setPadding(new Insets(50));
         root.setAlignment(Pos.CENTER);
-        root.getChildren().setAll(lblTitle, VBinstructions, grid, btnStart);
+        root.getChildren().setAll(lblTitle, VBinstructions, grid, btnStart, btnClear);
 
         // Set up UI and show
         scene = new Scene(root);
@@ -86,6 +89,7 @@ public class HelloApplication extends Application {
             Platform.exit();
             System.exit(0);
         });
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -139,10 +143,18 @@ public class HelloApplication extends Application {
                 simulation.start();
 
                 btnStart.setText("Stop simulation");
+                btnClear.setDisable(true);
             }else{
                 isSimulationRunning = false;
                 //checkKeys = true; (moved to end of simulation logic)
                 btnStart.setText("Start simulation");
+                btnClear.setDisable(false);
+            }
+        });
+
+        btnClear.setOnAction(event -> {
+            if(!isSimulationRunning){
+                washGrid();
             }
         });
     }
@@ -186,6 +198,8 @@ public class HelloApplication extends Application {
                 for (int j = 0; j < TILES_IN_ROW; j++) {
                     Tile tile = tiles[i][j];
                     TileState originalState = tile.getState();
+
+                    // TODO: this is where the simulation logic should be
                     switch (originalState) {
                         case EMPTY:
                             tile.setState(TileState.WATER);
