@@ -8,6 +8,8 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -20,12 +22,15 @@ import java.util.Random;
 
 public class HelloApplication extends Application {
 
+    // TODO: perhaps water physics can be improved so that water doesnt fall all the way down automatically
+    // TODO: I could make drawing with the mouse easier by drawing a block of cells at a time
+
     // VARIABLES
     // static variables
     // Note: Grid will be a square
     static final int GRID_WIDTH = 400; // (in pixels)
-    static final int TILES_IN_ROW = 25;
-    static final String TILE_STARTING_COLOR = "#ebebeb";
+    static final int TILES_IN_ROW = 100;
+    static final int ITERATIONS_PER_SECOND = 10;
 
     // UI components that have to be global
     Scene scene;
@@ -87,7 +92,13 @@ public class HelloApplication extends Application {
             System.exit(0);
         });
         stage.setResizable(false);
+        setIcon(stage);
         stage.show();
+    }
+
+    public void setIcon(Stage stage){
+        Image icon = new Image(getClass().getResource("sea.png").toExternalForm());
+        stage.getIcons().add(icon);
     }
 
     // Creates both UI grid and matrix with references to the tiles (for the logic later on)
@@ -192,7 +203,7 @@ public class HelloApplication extends Application {
     public void runSimulation(){
         while(isSimulationRunning) {
             runIteration();
-            pause(1000);
+            pause(1000/ITERATIONS_PER_SECOND);
         }
         washGrid();
         checkKeys = true;
@@ -214,8 +225,6 @@ public class HelloApplication extends Application {
 
     }
 
-    // TODO: we have to take into account solids as well
-
     // this is the logic for an iteration of a particular cell
     public void updateCell(int i, int j){
         Tile current = tiles[i][j];
@@ -236,11 +245,15 @@ public class HelloApplication extends Application {
     }
 
     public boolean lookDown(int i, int j){
+        if(i >= tiles.length - 1) return false;
+
         Tile current = tiles[i][j];
-        if(i < tiles.length - 1 && tiles[i+1][j].getState() == TileState.EMPTY){
-            swapCells(current, tiles[i+1][j]);
+        Tile other = tiles[i+1][j];
+        if(other.getState() == TileState.EMPTY){
+            swapCells(current, other);
             return true;
         }
+
         return false;
     }
 

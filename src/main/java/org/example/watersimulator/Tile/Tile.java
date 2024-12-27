@@ -27,7 +27,7 @@ public class Tile {
     // Other methods
     private void updateRectangle(){
         this.rectangle.setStroke(Color.web("#bfbfbf"));
-        this.rectangle.setStrokeWidth(0.5);
+        this.rectangle.setStrokeWidth(0);
         switch(this.state){
             case TileState.EMPTY:
                 this.rectangle.setFill(Color.web("#ebebeb"));
