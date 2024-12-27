@@ -36,7 +36,9 @@ public class HelloApplication extends Application {
     Button btnStart;
 
     // Other variables
+    Thread simulation;
     Tile[][] tiles;
+    boolean checkKeys = true;
     boolean isWPressed = false;
     boolean isSPressed = false;
     boolean isSimulationRunning = false;
@@ -130,41 +132,56 @@ public class HelloApplication extends Application {
 
         // Event for the start button
         btnStart.setOnAction(event -> {
-            new Thread(() -> runSimulation() ).start();
+            if(!isSimulationRunning){
+                isSimulationRunning = true;
+                checkKeys = false;
+                simulation = new Thread(this::runSimulation);
+                simulation.start();
+
+                btnStart.setText("Stop simulation");
+            }else{
+                isSimulationRunning = false;
+                //checkKeys = true; (moved to end of simulation logic)
+                btnStart.setText("Start simulation");
+            }
         });
     }
 
     // this method allows us to know if a key is pressed (the left click button doesnt work well for some reason)
     public void checkKeysPressed(){
         scene.setOnKeyPressed(event -> {
-            switch(event.getCode()){
-                case KeyCode.W:
-                    isWPressed = true;
-                    System.out.println("W is pressed");
-                    break;
-                case KeyCode S:
-                    isSPressed = true;
-                    System.out.println("S is pressed");
-                    break;
+            if(checkKeys){
+                switch(event.getCode()){
+                    case KeyCode.W:
+                        isWPressed = true;
+                        System.out.println("W is pressed");
+                        break;
+                    case KeyCode S:
+                        isSPressed = true;
+                        System.out.println("S is pressed");
+                        break;
+                }
             }
         });
         scene.setOnKeyReleased(event -> {
-            switch(event.getCode()){
-                case KeyCode.W:
-                    isWPressed = false;
-                    System.out.println("W is released");
-                    break;
-                case KeyCode S:
-                    isSPressed = false;
-                    System.out.println("S is released");
-                    break;
+            if(checkKeys){
+                switch(event.getCode()){
+                    case KeyCode.W:
+                        isWPressed = false;
+                        System.out.println("W is released");
+                        break;
+                    case KeyCode S:
+                        isSPressed = false;
+                        System.out.println("S is released");
+                        break;
+                }
             }
         });
     }
 
     // LOGIC
     public void runSimulation(){
-        while(true) {
+        while(isSimulationRunning) {
             for (int i = 0; i < TILES_IN_ROW; i++) {
                 for (int j = 0; j < TILES_IN_ROW; j++) {
                     Tile tile = tiles[i][j];
@@ -194,6 +211,8 @@ public class HelloApplication extends Application {
             }
             pause(1000);
         }
+        washGrid();
+        checkKeys = true;
     }
 
     public void washGrid(){
